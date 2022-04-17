@@ -1,14 +1,12 @@
 package dar.intern.clientcoreapi.controller;
 
-import dar.intern.clientcoreapi.model.ClientModel;
+
+import dar.intern.clientcoreapi.model.ClientRequest;
+import dar.intern.clientcoreapi.model.ClientResponse;
 import dar.intern.clientcoreapi.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,40 +16,31 @@ public class ClientController {
     @Autowired
     private ClientService clientService;
 
-    @Autowired
-    Environment env;
-
-    @GetMapping("/check")
-    public String checkClientApi(){
-        return "ApiIsWorking at " + env.getProperty("local.server.port");
+    @GetMapping
+    public ClientResponse getClientById(@RequestParam String clientId){
+        return clientService.getClientById(clientId);
     }
-
     @GetMapping("/all")
-    public List<ClientModel> getAllClients(){
+    public List<ClientResponse> getAllClients(){
         return clientService.getAllClients();
     }
 
-    @GetMapping("/{clientId}")
-    public ClientModel getClientById(@PathVariable String clientId){
-        return clientService.getClientById(clientId);
-    }
-
     @PostMapping
-    public ResponseEntity<String> createClient(@Valid @RequestBody ClientModel clientModel) {
-        clientService.createClient(clientModel);
-        return new ResponseEntity<String>("Succesfully created", HttpStatus.OK);
+    public ClientResponse createClient(@RequestBody ClientRequest clientRequest){
+        return clientService.createClient(clientRequest);
     }
 
-    @PutMapping("/{clientId}")
-    public ResponseEntity<String> updateClientById(@PathVariable String clientId,
-                                                   @Valid @RequestBody ClientModel clientModel){
-        clientService.updateClient(clientId, clientModel);
-        return new ResponseEntity<String>("Successfully updated", HttpStatus.OK);
+    @PutMapping
+    public ClientResponse updateClient(@RequestParam String clientId,
+                                       @RequestBody ClientRequest clientRequest){
 
+        clientRequest.setClientId(clientId);
+        return clientService.updateClientById(clientRequest);
     }
-    @DeleteMapping("/{clientId}")
-    public ResponseEntity<String> deleteCLientById(@PathVariable String clientId){
-        clientService.deleteClient(clientId);
-        return new ResponseEntity<String>("Successfully deleted", HttpStatus.OK);
+
+    @DeleteMapping
+    public void deleteClient(@RequestParam String clientId) {
+        clientService.deleteClientById(clientId);
     }
+
 }
